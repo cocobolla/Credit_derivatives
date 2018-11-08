@@ -190,20 +190,18 @@ class LIBOR():
         # Get Forward discount
         for maturity_tuple, ratio in forward_discount_dict.items():
             # Use the pre-calculated data if day diff < 20
-            T1_diff_list = [maturity for maturity in discount_dict if abs((maturity - maturity_tuple[0]).days) < 20]
-            T2_diff_list = [maturity for maturity in discount_dict if abs((maturity - maturity_tuple[1]).days) < 20]
+            T1_diff_list = [maturity for maturity in discount_dict if abs((maturity - maturity_tuple[0]).days) < 20 and discount_dict[maturity] > 0]
+            T2_diff_list = [maturity for maturity in discount_dict if abs((maturity - maturity_tuple[1]).days) < 20 and discount_dict[maturity] > 0]
 
             # If there are data we can use as Z(0,T1), with this we can get Z(0,T2)
             if len(T1_diff_list) > 0:
                 discount_factor = discount_dict[T1_diff_list[0]]
-                if discount_factor > 0:
-                    discount_dict[maturity_tuple[1]] = discount_factor*ratio
+                discount_dict[maturity_tuple[1]] = discount_factor*ratio
 
             # If there are data we can use as Z(0,T2)
             elif len(T2_diff_list) > 0:
                 discount_factor = discount_dict[T2_diff_list[0]]
-                if discount_factor > 0:
-                    discount_dict[maturity_tuple[0]] = discount_factor/ratio
+                discount_dict[maturity_tuple[0]] = discount_factor/ratio
             else:
                 discount_dict[maturity_tuple[0]] = -1
                 discount_dict[maturity_tuple[1]] = -1

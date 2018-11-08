@@ -128,7 +128,7 @@ class LIBOR():
         pass
 
     # Calculate LIBOR discount factor with deposit data
-    def calculate_on_deposit(self):
+    def _calculate_on_deposit(self):
         data = self.data_dict['Deposit']
         discount_factor_dict = {}
 
@@ -159,7 +159,7 @@ class LIBOR():
         return discount_factor_dict
 
     # Calculate LIBOR discount factor with futures data
-    def calculate_on_future(self):
+    def _calculate_on_future(self):
         data = self.data_dict['Futures']
         # key: (T1, T2), Value: Z(0, T2)/Z(0, T1)
         discount_factor_dict = {}
@@ -179,12 +179,12 @@ class LIBOR():
         return discount_factor_dict
 
     # Calculate LIBOR discount factor with swaps data
-    def calculate_on_swap(self):
+    def _calculate_on_swap(self):
         pass
 
     def draw_curve(self):
-        deposit_discount_dict = self.calculate_on_deposit()
-        forward_discount_dict = self.calculate_on_future()
+        deposit_discount_dict = self._calculate_on_deposit()
+        forward_discount_dict = self._calculate_on_future()
         discount_dict = deposit_discount_dict
 
         # Get Forward discount
@@ -232,7 +232,10 @@ class LIBOR():
 
 if __name__ == '__main__':
     trade_date = datetime.date(2018, 10, 29)
-    libor = LIBOR(trade_date, 0.3)
-    libor.data_load('data.xlsx')
+    futures_volatility = 0.3
+    data_path = 'data.xlsx'
+
+    libor = LIBOR(trade_date, futures_volatility)
+    libor.data_load(data_path)
     libor.draw_curve()
 

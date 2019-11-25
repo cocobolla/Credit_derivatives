@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Nov 08 06:11 2018
-@author: Cocobolla
+@author: Cocobolla (Chanju Park)
 """
 import datetime
 import pandas as pd
@@ -39,7 +39,7 @@ class LIBOR():
         data = pd.read_excel(data_path)
         for index in data.index:
             # Unify date format
-            date = (data.ix[index]['Term'])
+            date = (data.loc[index]['Term'])
             if type(date) == str and date not in ['O/N', 'T/N']:
                 try:
                     date_unit = self.date_dict[date[-1]]
@@ -47,18 +47,18 @@ class LIBOR():
                     diff_date = date.replace(date[-1], '*' + date_unit)
                     # Change '1*7' string into 1*7 = 7 number
                     diff_date = eval(diff_date)
-                    data.ix[index, 'Term'] = self.trade_date + relativedelta(days=diff_date)
+                    data.loc[index, 'Term'] = self.trade_date + relativedelta(days=diff_date)
                 except KeyError:
                     print("Date Format({}) is starange!".format(data.ix[index, 'Term']))
                     print(data.ix[index])
                     raise
             elif type(date) == datetime.datetime:
-                data.ix[index, 'Term'] = data.ix[index, 'Term'].date()
+                data.loc[index, 'Term'] = data.loc[index, 'Term'].date()
 
-            instrument = data.ix[index, 'Instrument']
+            instrument = data.loc[index, 'Instrument']
             # Unify price unit(% -> float point)
             if instrument != 'Futures':
-                data.ix[index, 'Rate'] /= 100
+                data.loc[index, 'Rate'] /= 100
         self.data = data
         self.data_dict = {
             'Deposit': self.data.loc[self.data.loc[:, 'Instrument'] == 'MMD'],
@@ -136,11 +136,11 @@ class LIBOR():
 
         on_index = data.loc[:, 'Term'] == 'O/N'
         tn_index = data.loc[:, 'Term'] == 'T/N'
-        other_index = ( (on_index + tn_index) != True )
+        other_index = ((on_index + tn_index) != True )
 
         # If O/N and T/N data are more than 1, Use first data
         on_libor = data.loc[on_index].iloc[0]['Rate']
-        tn_libor = data.ix[tn_index].iloc[0]['Rate']
+        tn_libor = data.loc[tn_index].iloc[0]['Rate']
 
         # Calculate Discount Factor at ts using overnight and tomorrow next LIBOR
         Z_ts = ((1 + on_libor/settle_convention)*(1 + tn_libor/settle_convention))
@@ -217,7 +217,7 @@ class LIBOR():
             zero_rate *= 100
             libor_dict[key] = zero_rate
 
-        plt.step(libor_dict.keys(), libor_dict.values(), where='post')
+        plt.step(list(libor_dict.keys()), list(libor_dict.values()), where='post')
         plt.xlabel('Date')
         plt.ylabel('LIBOR(%)')
         plt.title('LIBOR Curve')
